@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: kuma-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: uptimekuma
+      MYSQL_USER: kumauser
+      MYSQL_PASSWORD: kumapassword
+    volumes:
+      - kuma-db:/var/lib/mysql
+    networks:
+      - kuma-network
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:beta
+    container_name: uptime-kuma-v2
+    restart: always
+    ports:
+      - "3002:3001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TZ=UTC
+      - DATABASE_TYPE=mysql
+      - DATABASE_HOST=kuma-db
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=uptimekuma
+      - DATABASE_USER=kumauser
+      - DATABASE_PASSWORD=kumapassword
+    depends_on:
+      - mariadb
+    networks:
+      - kuma-network
+
+volumes:
+  kuma-db:
+
+networks:
+  kuma-network:
